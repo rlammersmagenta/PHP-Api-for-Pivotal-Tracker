@@ -147,7 +147,7 @@ class Meta implements \ArrayAccess
                     break;
 
                 case 'set':
-                    return call_user_method_array('setData', $this, array_merge(array($field), $params));
+                    return call_user_func_array([$this, 'setData'], array_merge(array($field), $params));
                     break;
 
                 case 'has':

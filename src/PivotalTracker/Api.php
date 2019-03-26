@@ -64,8 +64,8 @@ class Api
 
     protected function _execErrorCallback()
     {
-        if (!is_null($cb = $this->getErrorCallback())) {
-            $cb($this);
+        if (!is_null($this->getErrorCallback())) {
+            $this->getErrorCallback()($this);
             return true;
         }
 
@@ -216,7 +216,7 @@ class Api
             static::HTTP_METHOD_GET     => array(CURLOPT_HTTPGET, 1),
         );
 
-        call_user_method_array('_curl', $this, $methods[$this->getRequestMethod()]);
+        call_user_func_array([$this, '_curl'], $methods[$this->getRequestMethod()]);
 
         return $this;
     }
