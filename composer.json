@@ -1,7 +1,9 @@
 {
-    "autoload": {
-        "psr-0" : {
-            ""          : "src/"
-        }
+  "name": "rlammersmagenta/PHP-Api-for-Pivotal-Tracker",
+  "version": "v0.1.0",
+  "autoload": {
+    "psr-0": {
+      "": "src/"
     }
+  }
 }
