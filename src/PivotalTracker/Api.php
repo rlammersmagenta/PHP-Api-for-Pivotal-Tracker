@@ -31,7 +31,29 @@ class Api
 
     protected $_requestData = null;
 
+    protected $_requestHttpHeaders = null;
+
     protected $_response = null;
+
+    protected $_verbose = false;
+
+    /**
+     * @return bool
+     */
+    public function isVerbose()
+    {
+        return $this->_verbose;
+    }
+
+    /**
+     * @param bool $verbose
+     * @return Api
+     */
+    public function setVerbose($verbose)
+    {
+        $this->_verbose = $verbose;
+        return $this;
+    }
 
     protected $_errorCallback = null;
 
@@ -161,8 +183,11 @@ class Api
         $this->_curlHandle = curl_init($url);
 
         $this->_curl(CURLOPT_HEADER, true)
+            ->_curl(CURLOPT_VERBOSE, $this->isVerbose())
             ->_curl(CURLOPT_RETURNTRANSFER, true)
             ->_curl(CURLOPT_SSL_VERIFYPEER, false);
+
+        $this->_requestHttpHeaders = [];
 
         $this->_authCurl();
 
@@ -193,9 +218,8 @@ class Api
         }
 
         if ($token = $this->getToken()) {
-            $this->_curl(CURLOPT_HTTPHEADER, array(
-                sprintf('X-TrackerToken: %s', $token),
-            ));
+            $this->addRequestHttpHeader(sprintf('X-TrackerToken: %s', $token));
+            $this->_curl(CURLOPT_HTTPHEADER, $this->getRequestHttpHeaders());
         }
 
         return $this;
@@ -237,13 +261,16 @@ class Api
 
         if (in_array($this->getRequestMethod(), $methods)) {
             $data = $this->getRequestData();
-            $data = http_build_query(!is_null($data) ? $data : array());
+            $data = json_encode(!is_null($data) ? $data : array());
             $contentLength = strlen($data);
 
+            $this->addRequestHttpHeaders([
+                'Content-Type: application/json',
+                sprintf('Content-Length: %d', $contentLength)
+            ]);
+
             $this->_curl(CURLOPT_POSTFIELDS, $data)
-                ->_curl(CURLOPT_HTTPHEADER, array(
-                    sprintf('Content-Length: %d', $contentLength),
-                ));
+                ->_curl(CURLOPT_HTTPHEADER, $this->getRequestHttpHeaders());
         }
 
         return $this;
@@ -330,6 +357,44 @@ class Api
     public function getRequestData()
     {
         return $this->_requestData;
+    }
+
+
+
+    public function setRequestHttpHeaders(array $headers)
+    {
+        $this->_requestHttpHeaders = $headers;
+
+        return $this;
+    }
+
+
+
+    public function addRequestHttpHeaders(array $headers)
+    {
+        foreach ($headers as $header) {
+            $this->addRequestHttpHeader($header);
+        }
+    }
+
+
+
+    public function addRequestHttpHeader($header)
+    {
+        if (!is_array($this->_requestHttpHeaders)) {
+            $this->_requestHttpHeaders = [];
+        }
+
+        $this->_requestHttpHeaders[] = $header;
+
+        return $this;
+    }
+
+
+
+    public function getRequestHttpHeaders()
+    {
+        return $this->_requestHttpHeaders;
     }
 
 

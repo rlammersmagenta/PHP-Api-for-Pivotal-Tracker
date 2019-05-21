@@ -176,7 +176,7 @@ class Endpoint
         if (count($missingParams)) {
             Api::newException(
                 'Cannot prepare endpoint "%s", missing param(s): %s',
-                $endpoint,
+                $this->_endpoint,
                 implode(', ', $missingParams)
             )->throwMe();
         }
@@ -355,7 +355,7 @@ class Endpoint
     {
         $method = strtoupper($method);
 
-        return in_array($parameters, $this->getAdditionalParameters($method));
+        return in_array($parameter, $this->getAdditionalParameters($method));
     }
 
 
